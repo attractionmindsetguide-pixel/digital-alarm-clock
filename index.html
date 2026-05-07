@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Alarm Clock with Tasks</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .alarm-clock {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .clock-display {
+            text-align: center;
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .time {
+            font-size: 72px;
+            font-weight: 700;
+            color: #333;
+            letter-spacing: 3px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .period {
+            font-size: 24px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .alarm-section h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 25px;
+            align-items: center;
+        }
+
+        .input-group input {
+            width: 70px;
+            padding: 12px;
+            font-size: 24px;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-group span {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .task-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .task-input input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .task-input input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .task-input button {
+            padding: 12px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .task-input button:hover {
+            background: #5568d3;
+        }
+
+        .tasks-list {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 10px;
+        }
+
+        .tasks-list h4 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        #tasksList {
+            list-style: none;
+        }
+
+        #tasksList li {
+            padding: 8px 12px;
+            background: white;
+            margin: 5px 0;
+            border-radius: 6px;
+            color: #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        #tasksList button {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.3s;
+        }
+
+        #tasksList button:hover {
+            background: #ff5252;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .btn-primary,
+        .btn-secondary {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .status {
+            text-align: center;
+            font-size: 14px;
+            min-height: 20px;
+        }
+
+        .status.active {
+            color: #4caf50;
+            font-weight: 600;
+        }
+
+        .status.error {
+            color: #ff6b6b;
+            font-weight: 600;
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.hidden {
+            display: none;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 30px 90px rgba(0, 0, 0, 0.5);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-content h2 {
+            font-size: 48px;
+            color: #ff6b6b;
+            margin-bottom: 20px;
+            animation: pulse 0.8s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .alarm-time {
+            font-size: 60px;
+            color: #333;
+            font-weight: 700;
+            margin-bottom: 30px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .tasks-panel {
+            background: #f5f5f5;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .tasks-panel h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .tasks-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            gap: 12px;
+        }
+
+        .task-item input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+
+        .task-item label {
+            flex: 1;
+            cursor: pointer;
+            color: #333;
+            font-weight: 500;
+            user-select: none;
+        }
+
+        .task-item input[type="checkbox"]:checked + label {
+            color: #999;
+            text-decoration: line-through;
+        }
+
+        .instruction {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .btn-stop {
+            width: 100%;
+            padding: 18px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-stop:hover:not(:disabled) {
+            background: #ff5252;
+            transform: scale(1.05);
+        }
+
+        .btn-stop:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .btn-stop:not(:disabled) {
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+        }
+
+        @media (max-width: 480px) {
+            .alarm-clock {
+                padding: 30px 20px;
+            }
+
+            .time {
+                font-size: 48px;
+            }
+
+            .input-group input {
+                width: 60px;
+                font-size: 20px;
+            }
+
+            .modal-content {
+                padding: 30px 20px;
+            }
+
+            .modal-content h2 {
+                font-size: 36px;
+            }
+
+            .alarm-time {
+                font-size: 44px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="alarm-clock">
+            <div class="clock-display">
+                <div class="time" id="currentTime">00:00:00</div>
+                <div class="period" id="period">AM</div>
+            </div>
+
+            <div class="alarm-section">
+                <h3>Set Alarm</h3>
+                <div class="input-group">
+                    <input type="number" id="alarmHours" min="0" max="23" placeholder="HH" value="07">
+                    <span>:</span>
+                    <input type="number" id="alarmMinutes" min="0" max="59" placeholder="MM" value="00">
+                    <span>:</span>
+                    <input type="number" id="alarmSeconds" min="0" max="59" placeholder="SS" value="00">
+                </div>
+
+                <div class="task-input">
+                    <input type="text" id="taskInput" placeholder="Enter task to complete before stopping alarm">
+                    <button id="addTaskBtn">Add Task</button>
+                </div>
+
+                <div class="tasks-list">
+                    <h4>Tasks for this alarm:</h4>
+                    <ul id="tasksList"></ul>
+                </div>
+
+                <div class="button-group">
+                    <button id="setAlarmBtn" class="btn-primary">Set Alarm</button>
+                    <button id="clearAlarmBtn" class="btn-secondary">Clear Alarm</button>
+                </div>
+
+                <div id="alarmStatus" class="status"></div>
+            </div>
+        </div>
+
+        <div id="alarmModal" class="modal hidden">
+            <div class="modal-content">
+                <h2>⏰ ALARM!</h2>
+                <div class="alarm-time" id="alarmTime">07:00:00</div>
+                
+                <div class="tasks-panel">
+                    <h3>Complete Your Tasks:</h3>
+                    <div id="tasksContainer" class="tasks-container"></div>
+                </div>
+
+                <p class="instruction">Check off all tasks to stop the alarm</p>
+
+                <button id="stopAlarmBtn" class="btn-stop" disabled>Stop Alarm</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class AlarmClock {
+            constructor() {
+                this.alarmTime = null;
+                this.isAlarmActive = false;
+                this.isAlarmRinging = false;
+                this.tasks = [];
+                this.completedTasks = new Set();
+                this.alarmInterval = null;
+                this.clockInterval = null;
+
+                this.initializeElements();
+                this.attachEventListeners();
+                this.startClock();
+            }
+
+            initializeElements() {
+                this.currentTimeDisplay = document.getElementById('currentTime');
+                this.periodDisplay = document.getElementById('period');
+                this.alarmHoursInput = document.getElementById('alarmHours');
+                this.alarmMinutesInput = document.getElementById('alarmMinutes');
+                this.alarmSecondsInput = document.getElementById('alarmSeconds');
+                this.taskInput = document.getElementById('taskInput');
+                this.addTaskBtn = document.getElementById('addTaskBtn');
+                this.tasksList = document.getElementById('tasksList');
+                this.setAlarmBtn = document.getElementById('setAlarmBtn');
+                this.clearAlarmBtn = document.getElementById('clearAlarmBtn');
+                this.alarmStatus = document.getElementById('alarmStatus');
+                this.alarmModal = document.getElementById('alarmModal');
+                this.alarmTimeDisplay = document.getElementById('alarmTime');
+                this.stopAlarmBtn = document.getElementById('stopAlarmBtn');
+                this.tasksContainer = document.getElementById('tasksContainer');
+            }
+
+            attachEventListeners() {
+                this.addTaskBtn.addEventListener('click', () => this.addTask());
+                this.taskInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.addTask();
+                });
+                this.setAlarmBtn.addEventListener('click', () => this.setAlarm());
+                this.clearAlarmBtn.addEventListener('click', () => this.clearAlarm());
+                this.stopAlarmBtn.addEventListener('click', () => this.stopAlarm());
+            }
+
+            startClock() {
+                this.updateClock();
+                this.clockInterval = setInterval(() => this.updateClock(), 1000);
+            }
+
+            updateClock() {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                const period = now.getHours() >= 12 ? 'PM' : 'AM';
+
+                this.currentTimeDisplay.textContent = `${hours}:${minutes}:${seconds}`;
+                this.periodDisplay.textContent = period;
+
+                if (this.isAlarmActive && !this.isAlarmRinging) {
+                    this.checkAlarmTime(hours, minutes, seconds);
+                }
+            }
+
+            checkAlarmTime(hours, minutes, seconds) {
+                const alarmHours = String(this.alarmHoursInput.value).padStart(2, '0');
+                const alarmMinutes = String(this.alarmMinutesInput.value).padStart(2, '0');
+                const alarmSeconds = String(this.alarmSecondsInput.value).padStart(2, '0');
+
+                if (hours === alarmHours && minutes === alarmMinutes && seconds === alarmSeconds) {
+                    this.ringAlarm();
+                }
+            }
+
+            addTask() {
+                const taskText = this.taskInput.value.trim();
+                if (taskText === '') {
+                    alert('Please enter a task');
+                    return;
+                }
+
+                this.tasks.push(taskText);
+                this.taskInput.value = '';
+                this.renderTasks();
+            }
+
+            renderTasks() {
+                this.tasksList.innerHTML = '';
+                this.tasks.forEach((task, index) => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <span>${task}</span>
+                        <button onclick="alarmClock.removeTask(${index})">Remove</button>
+                    `;
+                    this.tasksList.appendChild(li);
+                });
+            }
+
+            removeTask(index) {
+                this.tasks.splice(index, 1);
+                this.completedTasks.delete(index);
+                this.renderTasks();
+            }
+
+            setAlarm() {
+                const hours = this.alarmHoursInput.value;
+                const minutes = this.alarmMinutesInput.value;
+                const seconds = this.alarmSecondsInput.value;
+
+                if (hours === '' || minutes === '' || seconds === '') {
+                    this.showStatus('Please set all time fields', 'error');
+                    return;
+                }
+
+                if (this.tasks.length === 0) {
+                    this.showStatus('Please add at least one task', 'error');
+                    return;
+                }
+
+                this.isAlarmActive = true;
+                const displayHours = String(hours).padStart(2, '0');
+                const displayMinutes = String(minutes).padStart(2, '0');
+                const displaySeconds = String(seconds).padStart(2, '0');
+                this.showStatus(`✓ Alarm set for ${displayHours}:${displayMinutes}:${displaySeconds}`, 'active');
+            }
+
+            clearAlarm() {
+                this.isAlarmActive = false;
+                this.isAlarmRinging = false;
+                this.completedTasks.clear();
+                this.alarmModal.classList.add('hidden');
+                this.stopAudio();
+                this.showStatus('Alarm cleared', 'error');
+            }
+
+            ringAlarm() {
+                this.isAlarmRinging = true;
+                this.completedTasks.clear();
+                this.alarmModal.classList.remove('hidden');
+                this.renderAlarmTasks();
+                this.playAudio();
+            }
+
+            renderAlarmTasks() {
+                this.tasksContainer.innerHTML = '';
+                const alarmHours = String(this.alarmHoursInput.value).padStart(2, '0');
+                const alarmMinutes = String(this.alarmMinutesInput.value).padStart(2, '0');
+                const alarmSeconds = String(this.alarmSecondsInput.value).padStart(2, '0');
+                this.alarmTimeDisplay.textContent = `${alarmHours}:${alarmMinutes}:${alarmSeconds}`;
+
+                this.tasks.forEach((task, index) => {
+                    const taskDiv = document.createElement('div');
+                    taskDiv.className = 'task-item';
+                    taskDiv.innerHTML = `
+                        <input type="checkbox" id="task-${index}" onchange="alarmClock.toggleTask(${index})">
+                        <label for="task-${index}">${task}</label>
+                    `;
+                    this.tasksContainer.appendChild(taskDiv);
+                });
+
+                this.updateStopButtonState();
+            }
+
+            toggleTask(index) {
+                const checkbox = document.getElementById(`task-${index}`);
+                if (checkbox.checked) {
+                    this.completedTasks.add(index);
+                } else {
+                    this.completedTasks.delete(index);
+                }
+                this.updateStopButtonState();
+            }
+
+            updateStopButtonState() {
+                const allTasksCompleted = this.completedTasks.size === this.tasks.length;
+                this.stopAlarmBtn.disabled = !allTasksCompleted;
+            }
+
+            stopAlarm() {
+                if (this.completedTasks.size === this.tasks.length) {
+                    this.isAlarmRinging = false;
+                    this.isAlarmActive = false;
+                    this.completedTasks.clear();
+                    this.alarmModal.classList.add('hidden');
+                    this.stopAudio();
+                    this.showStatus('✓ Alarm stopped - Tasks completed!', 'active');
+                }
+            }
+
+            showStatus(message, type) {
+                this.alarmStatus.textContent = message;
+                this.alarmStatus.className = `status ${type}`;
+            }
+
+            playAudio() {
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.frequency.value = 800;
+                    oscillator.type = 'sine';
+
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.5);
+
+                    this.beepInterval = setInterval(() => {
+                        if (!this.isAlarmRinging) {
+                            clearInterval(this.beepInterval);
+                            return;
+                        }
+
+                        const osc = audioContext.createOscillator();
+                        const gain = audioContext.createGain();
+
+                        osc.connect(gain);
+                        gain.connect(audioContext.destination);
+
+                        osc.frequency.value = 800;
+                        osc.type = 'sine';
+
+                        gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+                        osc.start(audioContext.currentTime);
+                        osc.stop(audioContext.currentTime + 0.5);
+                    }, 700);
+                } catch (e) {
+                    console.log('Audio not available');
+                }
+            }
+
+            stopAudio() {
+                if (this.beepInterval) {
+                    clearInterval(this.beepInterval);
+                }
+            }
+        }
+
+        const alarmClock = new AlarmClock();
+    </script>
+</body>
+</html>
